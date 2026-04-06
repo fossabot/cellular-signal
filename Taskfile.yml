@@ -9,9 +9,14 @@ vars:
 tasks:
   lint:
     summary: Lint code
+    sources: &SOURCES
+      - "**/*.go"
+      - "**/*.md"
+      - "**/*.yml"
     cmds:
       - go mod tidy -diff
       - golangci-lint run ./...
+      - prettier --check .
 
   test:
     summary: Run tests
@@ -50,9 +55,10 @@ tasks:
 
   fmt:
     summary: Format the code
+    sources: *SOURCES
     cmds:
       - golangci-lint run --fix ./...
-      - prettier -w .
+      - prettier --write .
 
   tidy:
     summary: Tidy the module
