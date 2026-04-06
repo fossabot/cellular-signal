@@ -95,7 +95,7 @@ signal.QualityNone       // "No Signal"
 quality.String()  // Human-readable name
 
 // Visual representation
-quality.Emoji()   // Star representation (★★★★★, ★★★★☆, etc.)
+quality.Stars()   // Star representation (★★★★★, ★★★★☆, etc.)
 ```
 
 ### Formatting Output

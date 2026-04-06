@@ -24,7 +24,7 @@ func TestQualityString(t *testing.T) {
 	}
 }
 
-func TestQualityEmoji(t *testing.T) {
+func TestQualityStars(t *testing.T) {
 	tests := []struct {
 		quality  Quality
 		expected string
@@ -39,8 +39,8 @@ func TestQualityEmoji(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.quality.String(), func(t *testing.T) {
-			if got := tt.quality.Emoji(); got != tt.expected {
-				t.Errorf("Quality.Emoji() = %v, want %v", got, tt.expected)
+			if got := tt.quality.Stars(); got != tt.expected {
+				t.Errorf("Quality.Stars() = %v, want %v", got, tt.expected)
 			}
 		})
 	}
