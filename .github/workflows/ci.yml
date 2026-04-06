@@ -9,28 +9,7 @@ on:
 permissions: {}
 
 jobs:
-  versions:
-    runs-on: ubuntu-latest
-    outputs:
-      go: ${{ steps.go-version.outputs.value }}
-      golangci-lint: ${{ steps.golangci-lint-version.outputs.value }}
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-        with:
-          persist-credentials: false
-      - uses: hudsonm62/toml-action@14f8558e5c72f7c3e4d3aeb0745587f22bb2c9bb
-        id: go-version
-        with:
-          file: mise.toml
-          field: tools.go
-      - uses: hudsonm62/toml-action@14f8558e5c72f7c3e4d3aeb0745587f22bb2c9bb
-        id: golangci-lint-version
-        with:
-          file: mise.toml
-          field: tools.golangci-lint
-
   lint:
-    needs: versions
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -39,52 +18,50 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           persist-credentials: false
-      - &setup-go
-        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff
-        with:
-          go-version: ${{ needs.versions.outputs.go }}
-      - uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20
-        with:
-          version: v${{ needs.versions.outputs.golangci-lint }}
+      - &setup-mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151
+      - name: Lint
+        run: task lint
 
   test:
-    needs: versions
     runs-on: ubuntu-latest
+    environment: test
     permissions:
       contents: read
     steps:
       - *checkout
-      - *setup-go
-      - name: Install Task
-        uses: arduino/setup-task@b91d5d2c96a56797b48ac1e0e89220bf64044611
+      - *setup-mise
       - name: Test
         run: task test
       - name: Coverage
         run: task covercheck
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2
+        with:
+          files: cover.out
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   build:
-    needs: [versions, lint, test]
+    needs: [lint, test]
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
       - *checkout
-      - *setup-go
+      - *setup-mise
       - name: Build
         run: go build ./...
 
   release:
     runs-on: ubuntu-latest
-    needs: [versions, build]
+    needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
     steps:
       - *checkout
-      - *setup-go
       - uses: go-semantic-release/action@2e9dc4247a6004f8377781bef4cb9dad273a741f
         with:
           allow-initial-development-versions: true
-          hooks: goreleaser
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

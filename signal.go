@@ -38,8 +38,8 @@ func (q Quality) String() string {
 	}
 }
 
-// Emoji returns a visual representation of signal quality using star characters.
-func (q Quality) Emoji() string {
+// Stars returns a visual representation of signal quality using star characters.
+func (q Quality) Stars() string {
 	switch q {
 	case QualityExcellent:
 		return "★★★★★"
@@ -202,7 +202,7 @@ func (r *Rater) Format(rating Rating) string {
 		rating.Value,
 		rating.Metric.Unit(),
 		rating.Quality,
-		rating.Quality.Emoji(),
+		rating.Quality.Stars(),
 	)
 }
 
