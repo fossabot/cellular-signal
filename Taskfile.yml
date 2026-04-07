@@ -57,7 +57,7 @@ tasks:
     summary: Format the code
     sources: *SOURCES
     cmds:
-      - golangci-lint run --fix ./...
+      - golangci-lint fmt ./...
       - prettier --write .
 
   tidy:

@@ -358,7 +358,11 @@ func TestRateValueWithGapThresholds(t *testing.T) {
 	// This triggers: if value >= thresholds[0].MaxValue
 	rating := rater.RateRSRP(-35)
 	if rating.Quality != QualityExcellent {
-		t.Errorf("RateRSRP(-35) with gap thresholds = %v, want %v", rating.Quality, QualityExcellent)
+		t.Errorf(
+			"RateRSRP(-35) with gap thresholds = %v, want %v",
+			rating.Quality,
+			QualityExcellent,
+		)
 	}
 
 	// Test value in the gap between Excellent and Good (-50 to -60)
