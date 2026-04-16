@@ -28,6 +28,7 @@ package main
 
 import (
     "fmt"
+    "log"
 
     "github.com/hugoh/cellular-signal"
 )
@@ -61,9 +62,12 @@ customThresholds := []signal.Threshold{
     {MinValue: -100, MaxValue: -80, Quality: signal.QualityGood},
     {MinValue: -200, MaxValue: -100, Quality: signal.QualityPoor},
 }
-rater = signal.NewRaterWithThresholds(
+rater, err := signal.NewRaterWithThresholds(
     signal.WithRSRPThresholds(customThresholds),
 )
+if err != nil {
+    log.Fatalf("Failed to create rater: %v", err)
+}
 ```
 
 ### Rating Signals

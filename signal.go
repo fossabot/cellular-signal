@@ -3,9 +3,14 @@
 package signal
 
 import (
+	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 )
+
+// ErrEmptyThresholds is returned when threshold slices are empty.
+var ErrEmptyThresholds = errors.New("thresholds must not be empty")
 
 // Quality represents a signal quality rating level.
 type Quality int
@@ -154,13 +159,38 @@ func NewRater() *Rater {
 }
 
 // NewRaterWithThresholds creates a Rater with custom thresholds.
-func NewRaterWithThresholds(opts ...Option) *Rater {
-	r := NewRater()
+// Returns an error if any threshold slice is empty.
+func NewRaterWithThresholds(opts ...Option) (*Rater, error) {
+	rater := NewRater()
 	for _, opt := range opts {
-		opt(r)
+		opt(rater)
 	}
 
-	return r
+	if err := validateThresholds(rater.rsrpThresholds, "RSRP"); err != nil {
+		return nil, err
+	}
+
+	if err := validateThresholds(rater.rsrqThresholds, "RSRQ"); err != nil {
+		return nil, err
+	}
+
+	if err := validateThresholds(rater.rssiThresholds, "RSSI"); err != nil {
+		return nil, err
+	}
+
+	if err := validateThresholds(rater.sinrThresholds, "SINR"); err != nil {
+		return nil, err
+	}
+
+	return rater, nil
+}
+
+func validateThresholds(thresholds []Threshold, metricName string) error {
+	if len(thresholds) == 0 {
+		return fmt.Errorf("%s: %w", metricName, ErrEmptyThresholds)
+	}
+
+	return nil
 }
 
 // RateRSRP rates an RSRP signal value.
@@ -254,7 +284,19 @@ func appendVerb(builder *strings.Builder, verb byte, rating Rating) {
 	}
 }
 
+// rateValue determines the quality rating for a given value based on thresholds.
+// Thresholds are expected to be ordered from highest quality (best) to lowest.
+//
+// Behavior:
+//   - If value falls within a threshold range [MinValue, MaxValue), returns that threshold's Quality
+//   - If value >= thresholds[0].MaxValue (above highest threshold), returns thresholds[0].Quality
+//   - If value falls in gaps between thresholds or below all thresholds, returns the
+//     last threshold's Quality (typically the worst quality)
 func rateValue(value float64, thresholds []Threshold) Quality {
+	if len(thresholds) == 0 {
+		return QualityNone
+	}
+
 	for _, t := range thresholds {
 		if value >= t.MinValue && value < t.MaxValue {
 			return t.Quality
