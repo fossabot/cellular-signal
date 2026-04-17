@@ -173,5 +173,4 @@ See [pkg.go.dev](https://pkg.go.dev/github.com/hugoh/cellular-signal) for full A
 
 MIT License - see [LICENSE](LICENSE) for details.
 
-
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhugoh%2Fcellular-signal.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhugoh%2Fcellular-signal?ref=badge_large)
